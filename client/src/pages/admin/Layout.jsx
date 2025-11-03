@@ -1,10 +1,19 @@
 import React from "react";
 import { assets } from "../../assets/assets";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import Sidebar from "../../components/admin/Sidebar";
+import { useAppContext } from "../../context/AppContext";
 
 const Layout = () => {
-  const navigate = useNavigate();
+
+  const {axios, setToken, navigate} = useAppContext();
+
+  const logout = ()=>{
+    localStorage.removeItem('token');
+    axios.defaults.headers.common['Authorization'] = null;
+    setToken(null);
+    navigate('/');
+  }
 
   return (
     <div>
@@ -17,8 +26,8 @@ const Layout = () => {
           alt="logo"
         />
         <button
-          onClick={() => navigate("/")}
-          className="border outline-none  text-center rounded-4xl bg-indigo-600 tranistion-all hover:bg-indigo-700 text-white w-1/5 sm:w-1/4 md:w-1/10 cursor-pointer py-1.5"
+          onClick={logout}
+          className="border-none outline-none  text-center rounded-4xl bg-indigo-600 tranistion-all hover:bg-indigo-700 text-white w-1/5 sm:w-1/4 md:w-1/10 cursor-pointer py-1.5"
         >
           Logout
         </button>

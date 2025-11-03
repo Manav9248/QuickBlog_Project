@@ -1,41 +1,74 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { assets, blog_data, comments_data } from "../assets/assets";
+import { assets } from "../assets/assets";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import Moment from "moment";
 import Loader from "../components/Loader";
+import { useAppContext } from "../context/AppContext";
+import toast from "react-hot-toast";
 
 const Blog = () => {
   const { id } = useParams();
 
+  const { axios } = useAppContext();
+
   const [data, setData] = useState(null);
   const [comments, setComments] = useState([]);
+  const [name, setName] = useState("");
+  const [content, setContent] = useState("");
 
-  //useState for form
-  const [name,setName] = useState('');
-  const [content, setContent] = useState('');
-
-  //function for comments
-  const fetchComments = async () =>{
-    setComments(comments_data)
-  }
-
-  //function for blogData
+  //function for blogData, Api integration ---> /api/blog/:id
   const fetchBlogData = async () => {
-    const data = blog_data.find((item) => item._id === id);
-    setData(data);
+    try {
+      const { data } = await axios.get(`/api/blog/${id}`);
+      data.success ? setData(data.blog) : toast.error(data.message);
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
-  //function for form
+  //function for comments, Api Integration, ---> /api/blog/comments
+  const fetchComments = async () => {
+    try {
+      const { data } = await axios.post(`/api/blog/comments`, { blogId: id });
+
+      if (data.success) {
+        setComments(data.comments);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  //function for addComment
   const addComment = async (e) => {
     e.preventDefault();
-  }
+    try {
+      const { data } = await axios.post(`/api/blog/add-comment`, {
+        blogId: id,
+        name,
+        content,
+      });
+
+      if (data.success) {
+        toast.success(data.message);
+        setName("");
+        setContent("");
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
 
   useEffect(() => {
     fetchBlogData();
     fetchComments();
-  },[]);
+  }, []);
 
   return data ? (
     <div className="relative">
@@ -45,61 +78,105 @@ const Blog = () => {
         alt=""
       />
       <Navbar />
-      <div className="flex flex-col justify-center mt-18 mb-10 items-center gap-3">
-        <p className="text-indigo-800 font-medium text-[1.1rem]">
+
+      <div className="mt-20 text-gray-600 text-center">
+        <p className="text-indigo-800 font-medium py-4">
           {/* for converting data and time in readable form use moment package from npm */}
           Published on {Moment(data.createdAt).format("MMMM Do YYYY")}
         </p>
-        <h1 className="font-semibold text-5xl text-center leading-[3rem] sm:w-4/5 lg:w-2/4 opacity-80">{data.title}</h1>
-        <p className="text-gray-500 my-2">{data.subTitle}</p>
-        <p className="border border-indigo-600 rounded-2xl text-center px-4 py-1 text-indigo-800 bg-purple-100/50 text-sm">Michael Brown</p>
-
-        <img className="rounded-4xl mt-8  text-center sm:w-10/11 lg:w-4/6 xl:w-6/8" src={data.image} alt="image" />
-        
-        <div className="">
-        <p className="rich-text max-w-3xl mx-auto"
-        dangerouslySetInnerHTML={{"__html": data.description}}>
+        <h1 className="text-2xl sm:text-5xl font-semibold max-w-2xl mx-auto text-gray-800">
+          {data.title}
+        </h1>
+        <h2 className="my-5 max-w-lg truncate mx-auto">{data.subTitle}</h2>
+        <p className="inline-block py-1 px-4 rounded-full mb-6 border text-sm border-primary/35 bg-primary/50 font-medium text-primary">
+          Michael Brown
         </p>
+      </div>
+
+      <div className="mx-5 max-w-5xl md:mx-auto my-10 mt-6">
+        <img className="rounded-3xl mb-5" src={data.image} alt="image" />
+
+        <div
+          className="rich-text max-w-3xl mx-auto"
+          dangerouslySetInnerHTML={{ __html: data.description }}
+        ></div>
+
+        {/* comment section */}
+        <div className="mt-14 mb-10 max-w-3xl mx-auto">
+          <p className="font-semibold mb-4">Comments ({comments.length})</p>
+
+          <div className="flex flex-col gap-4">
+            {comments.map((item, index) => (
+              <div
+                key={index}
+                className="relative bg-primary/2 border border-primary/5 max-w-xl p-4 rounded text-gray-600"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <img src={assets.user_icon} alt="" className="w-6" />
+                  <p className="font-medium">{item.name}</p>
+                </div>
+
+                <p className="text-sm max-w-md ml-8">{item.content}</p>
+                <div className="absolute right-4 bottom-3 flex items-center gap-2 text-xs">
+                  {Moment(item.createdAt).fromNow()}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* form section */}
+        <div className="max-w-3xl mx-auto">
+          <p className="font-semibold mb-4">Add your comment</p>
+          <form
+            onSubmit={addComment}
+            className="flex flex-col items-start gap-4 max-w-lg"
+          >
+            <input
+              onChange={(e) => setName(e.target.value)}
+              value={name}
+              type="text"
+              className="w-full p-2 border border-gray-300 rounded outline-none"
+              placeholder="Name"
+              required
+            />
+
+            <textarea
+              onChange={(e) => setContent(e.target.value)}
+              value={content}
+              className="w-full p-2 border border-gray-300 rounded outline-none h-48"
+              required
+              placeholder="Comment"
+            ></textarea>
+
+            <button
+              className="bg-primary text-white rounded p-2 px-8 hover:scale-102 transition-all cursor-pointer"
+              type="submit"
+            >
+              Submit
+            </button>
+          </form>
+        </div>
+
+        {/* share button */}
+        <div className="my-24 max-w-3xl mx-auto">
+          <p className="my-4 font-semibold">
+            Share this article on social media
+          </p>
+          <div className="flex">
+            <img src={assets.facebook_icon} alt="favicon" />
+            <img src={assets.twitter_icon} alt="twitter" />
+            <img src={assets.googleplus_icon} alt="google" />
+          </div>
         </div>
       </div>
 
-      {/* comment section */}
-      <div className="my-8 max-w-3xl mx-auto">
-    <p className="font-bold ">Comments ({comments.length})</p>
-    <p className="font-bold mt-10">Add your comment</p>
-    
-    {/* form section */}
-    <form onSubmit={addComment}
-     className=" mt-4 flex flex-col">
-     
-      <input onChange={(e)=>setName(e.target.value)}
-       type="text" 
-       value={name}
-      className="border outline-none border-gray-300 rounded p-2 sm:w-3/4 md:w-1/4"
-      placeholder="Name"
-      required/>
-      
-      <textarea
-       onChange={(e)=>setContent(e.target.value)}
-       value={content}
-       type="text" className="border mt-5 w-3/4 h-[10rem] md:w-1/4 p-2 border-gray-300 rounded outline-none" required placeholder="Comment"></textarea>
-      <div className="mt-5">
-      <button className="border-none py-2 px-6 bg-indigo-500 text-center rounded text-white text-md transition-all hover:scale-105" type="submit">Submit</button>
-      </div>
-    </form>
-    <div className="my-[5rem]">
-      <h1 className="text-md font-semibold">Share this article on social media</h1>
-      <div className="flex mt-3">
-        <img src={assets.facebook_icon} alt="favicon" />
-        <img src={assets.twitter_icon} alt="twitter" />
-        <img src={assets.googleplus_icon}  alt="google" />
-      </div>
-    </div>
-      </div>
       <Footer />
     </div>
   ) : (
-    <div><Loader/></div>
+    <div>
+      <Loader />
+    </div>
   );
 };
 

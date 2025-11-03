@@ -1,9 +1,8 @@
-import React from "react";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import Header from "../components/Header";
 import Bloglist from "../components/BlogList";
-import BlogCard from "../components/BlogCard";
+import NewsLetter from "../components/NewsLetter";
 
 const Home = () => {
   return (
@@ -11,13 +10,13 @@ const Home = () => {
       {/* Nav bar section comes here */}
       <Navbar />
       {/* Hero Section comes here */}
-      <Header/>
+      <Header />
 
       {/* Main hero section */}
       <Bloglist />
 
-      {/* Card section comes here */}
-      <BlogCard/>
+      {/* News letter section */}
+      <NewsLetter />
 
       {/* Footer Section  */}
       <Footer />
