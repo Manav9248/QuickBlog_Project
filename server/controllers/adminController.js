@@ -27,7 +27,7 @@ export const adminLogin = async (req, res) => {
 
 export const getAllBlogsAdmin = async (req, res) => {
   try {
-    const blogs = await Blog.find({}).sort({ createAt: -1 });
+    const blogs = await Blog.find({}).sort({ createdAt: -1 });
 
     res.json({ success: true, blogs });
   } catch (error) {
@@ -76,9 +76,6 @@ export const deleteCommentById = async (req, res) => {
   try {
     const { id } = req.body;
     await Comment.findByIdAndDelete(id);
-
-    // Delete all comments associated with the blog
-    await Comment.deleteMany({blog:id});
 
     res.json({ success: true, message: 'Comment deleted successfully' });
   } catch (error) {

@@ -49,7 +49,7 @@ const CommentTableItem = ({ comment, fetchComments }) => {
   };
 
   return (
-    <tr className="order-y border-gray-300">
+    <tr className="border-y border-gray-300">
       <td className="px-6 py-4">
         <b className="font-medium text-gray-600">Blog</b> : {blog.title}
         <br />
@@ -66,6 +66,7 @@ const CommentTableItem = ({ comment, fetchComments }) => {
           {!comment.isApproved ? (
             <img onClick={approveComment}
               src={assets.tick_icon}
+              alt="Approve comment"
               className="w-5 hover:scale-110 transition-all cursor-pointer"
             />
           ) : (
@@ -76,6 +77,7 @@ const CommentTableItem = ({ comment, fetchComments }) => {
 
           <img onClick={deleteComment}
             src={assets.bin_icon}
+            alt="delete comment"
             className="w-5 hover:scale-110 transition-all cursor-pointer"
           />
         </div>
