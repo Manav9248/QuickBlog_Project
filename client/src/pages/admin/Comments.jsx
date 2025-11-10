@@ -10,6 +10,7 @@ const Comments = () => {
 
   const { axios } = useAppContext();
 
+  // api integration for fetchComments
   const fetchComments = async () => {
     try {
       const { data } = await axios.get("/api/admin/comments");

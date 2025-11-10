@@ -29,10 +29,10 @@ export const AppProvider = ({ children }) => {
   // useEffect for rendering the blogs
   useEffect(() => {
     fetchBlogs();
-    const token = localStorage.getItem("token");
-    if (token) {
-      setToken(token);
-      axios.defaults.headers.common["Authorization"] = `${token}`;
+    const storedToken = localStorage.getItem("token");
+    if (storedToken) {
+      setToken(storedToken);
+      axios.defaults.headers.common["Authorization"] = `${storedToken}`;
     }
   }, []);
 
@@ -44,6 +44,7 @@ export const AppProvider = ({ children }) => {
     blogs,
     setBlogs,
     input,
+    fetchBlogs,
     setInput,
   };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

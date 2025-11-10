@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import { parse } from "marked";
 
 const Addblog = () => {
-  const { axios } = useAppContext();
+  const { axios,fetchBlogs } = useAppContext();
   const [isAdding, setIsAdding] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -41,6 +41,9 @@ const Addblog = () => {
 
       if (data.success) {
         toast.success(data.message);
+
+        fetchBlogs(); // Refresh Ui here
+
         setImage(false);
         setTitle("");
         setSubTitle("");
